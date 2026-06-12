@@ -1,0 +1,32 @@
+name: Meta CAPI Weekly Sync
+on:
+  schedule:
+    - cron: '0 10 * * 0'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: pip install requests
+      
+      - name: Run sync
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_OWNER: afp-digitalmarketing
+          GITHUB_REPO: buku-anak-meta-capi
+          CSV_FILE: yasa_capi_phone_upload.csv
+          META_PIXEL_ID: 1282968933941449
+          META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
+        run: python3 .github/scripts/meta_github_sync.py
+      
+      - name: Show logs
+        if: always()
+        run: cat sync.log 2>/dev/null || echo "No logs found"
